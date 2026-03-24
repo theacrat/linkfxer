@@ -1,6 +1,6 @@
 {
 	"name": "linkfxer",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"private": true,
 	"description": "Rewrite copied links to alternate domains.",
 	"type": "module",
@@ -25,6 +25,7 @@
 		"@tailwindcss/vite": "^4.2.2",
 		"@types/react": "^19.2.14",
 		"@types/react-dom": "^19.2.3",
+		"@wxt-dev/auto-icons": "^1.1.1",
 		"@wxt-dev/module-react": "^1.1.5",
 		"husky": "^9.1.7",
 		"lint-staged": "^16.4.0",

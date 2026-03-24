@@ -1,0 +1,6 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+	<style>
+		.s0 { paint-order:stroke fill markers;stroke: #ffffff;stroke-width: 3;stroke-linejoin: round;;fill: #000000 }
+	</style>
+	<path id="Fx" class="s0" aria-label="Fx"  d="m3.2 99v-69.2h52.9v14.8h-31.4v12.1h26.8v14h-26.8v28.3zm76.5-26.3l-17.2-23.9h22.8l7.9 14 9.3-14h21.2l-17.1 23.9 18.3 26.3h-22.4l-9.3-16.2-10.9 16.2h-20.8z"/>
+</svg>
