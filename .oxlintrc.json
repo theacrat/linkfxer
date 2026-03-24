@@ -1,0 +1,129 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": [
+		"eslint",
+		"typescript",
+		"unicorn",
+		"react",
+		"react-perf",
+		"oxc",
+		"import",
+		"jsx-a11y",
+		"node",
+		"promise"
+	],
+	"categories": {
+		"correctness": "error",
+		"suspicious": "error",
+		"pedantic": "error",
+		"style": "error",
+		"restriction": "error",
+		"perf": "error"
+	},
+	"rules": {
+		"eslint/id-length": "off",
+		"import/max-dependencies": ["warn", { "ignoreTypeImports": true }],
+		"import/group-exports": "off",
+		"eslint/eqeqeq": ["error", "smart"],
+		"eslint/max-lines": [
+			"warn",
+			{
+				"skipBlankLines": true,
+				"skipComments": true
+			}
+		],
+		"eslint/func-style": "off",
+		"eslint/max-lines-per-function": [
+			"warn",
+			{
+				"skipBlankLines": true,
+				"skipComments": true
+			}
+		],
+		"eslint/max-params": "off",
+		"eslint/max-statements": "off",
+		"eslint/no-continue": "off",
+		"eslint/no-empty": "off",
+		"eslint/no-eq-null": "off",
+		"eslint/no-await-in-loop": "off",
+		"eslint/no-console": "off",
+		"eslint/no-negated-condition": "off",
+		"eslint/no-magic-numbers": "off",
+		"eslint/no-use-before-define": "off",
+		"eslint/require-await": "off",
+		"eslint/no-ternary": "off",
+		"eslint/no-undef": "off",
+		"eslint/no-undefined": "off",
+		"eslint/no-void": "off",
+		"eslint/sort-keys": "off",
+		"eslint/no-duplicate-imports": [
+			"error",
+			{
+				"allowSeparateTypeImports": true
+			}
+		],
+		"eslint/sort-imports": "off",
+		"import/consistent-type-specifier-style": "off",
+		"import/no-default-export": "error",
+		"import/no-namespace": "off",
+		"import/no-relative-parent-imports": "off",
+		"import/no-named-export": "off",
+		"import/no-nodejs-modules": "off",
+		"import/no-unassigned-import": ["error", { "allow": ["**/*.css"] }],
+		"import/prefer-default-export": "off",
+		"import/unambiguous": "off",
+		"import/exports-last": "off",
+		"node/no-process-env": "off",
+		"oxc/no-async-await": "off",
+		"oxc/no-optional-chaining": "off",
+		"oxc/no-rest-spread-properties": "off",
+		"react/jsx-filename-extension": [
+			"error",
+			{
+				"extensions": ["jsx", "tsx"]
+			}
+		],
+		"react/jsx-max-depth": "off",
+		"react/jsx-props-no-spreading": "off",
+		"react/react-in-jsx-scope": "off",
+		"react/no-multi-comp": "off",
+		"react-perf/jsx-no-new-function-as-prop": "off",
+		"react-perf/jsx-no-new-object-as-prop": "off",
+		"typescript/no-explicit-any": "off",
+		"typescript/consistent-type-imports": ["error", { "disallowTypeAnnotations": false }],
+		"typescript/array-type": "off",
+		"typescript/consistent-type-definitions": "off",
+		"typescript/explicit-function-return-type": "off",
+		"typescript/explicit-module-boundary-types": "off",
+		"typescript/no-misused-promises": "off",
+		"typescript/no-non-null-assertion": "off",
+		"typescript/no-unsafe-assignment": "off",
+		"typescript/no-unsafe-argument": "off",
+		"typescript/no-unsafe-call": "off",
+		"typescript/no-unsafe-member-access": "off",
+		"typescript/no-unsafe-return": "off",
+		"typescript/prefer-readonly-parameter-types": "off",
+		"typescript/strict-boolean-expressions": "off",
+		"unicorn/no-array-callback-reference": "off",
+		"unicorn/no-array-sort": "off",
+		"unicorn/no-null": "off",
+		"unicorn/no-zero-fractions": "off",
+		"unicorn/prefer-global-this": "off",
+		"unicorn/prefer-top-level-await": "off",
+		"unicorn/escape-case": "off",
+		"unicorn/text-encoding-identifier-case": "off"
+	},
+	"overrides": [
+		{
+			"files": ["*.config.{js,ts}", "src/entrypoints/*.ts"],
+			"rules": {
+				"import/no-default-export": "off",
+				"import/prefer-default-export": ["error", { "target": "any" }]
+			}
+		}
+	],
+	"env": {
+		"builtin": true
+	},
+	"globals": {}
+}

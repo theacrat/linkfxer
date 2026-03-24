@@ -1,0 +1,47 @@
+{
+	"name": "linkfxer",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Rewrite copied links to alternate domains.",
+	"type": "module",
+	"scripts": {
+		"build": "wxt build",
+		"build:firefox": "wxt build -b firefox",
+		"compile": "tsc --noEmit",
+		"dev": "wxt",
+		"dev:firefox": "wxt -b firefox",
+		"format": "oxfmt --write",
+		"lint": "oxlint --type-aware --type-check --fix --fix-suggestions",
+		"postinstall": "wxt prepare",
+		"prepare": "husky",
+		"zip": "wxt zip",
+		"zip:firefox": "wxt zip -b firefox"
+	},
+	"dependencies": {
+		"react": "^19.2.4",
+		"react-dom": "^19.2.4"
+	},
+	"devDependencies": {
+		"@tailwindcss/vite": "^4.2.2",
+		"@types/react": "^19.2.14",
+		"@types/react-dom": "^19.2.3",
+		"@wxt-dev/module-react": "^1.1.5",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.4.0",
+		"oxfmt": "^0.41.0",
+		"oxlint": "^1.56.0",
+		"oxlint-tsgolint": "^0.17.2",
+		"tailwindcss": "^4.2.2",
+		"typescript": "^5.9.3",
+		"wxt": "^0.20.20"
+	},
+	"lint-staged": {
+		"*": [
+			"bun lint",
+			"bun format"
+		]
+	},
+	"trustedDependencies": [
+		"spawn-sync"
+	]
+}
