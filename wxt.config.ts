@@ -13,6 +13,11 @@ export default defineConfig({
 		action: {
 			default_title: "LinkFxer settings",
 		},
+		browser_specific_settings: {
+			gecko: {
+				id: "linkfxer@thea.pet",
+			},
+		},
 	},
 	srcDir: "src",
 });
