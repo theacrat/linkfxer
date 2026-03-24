@@ -51,11 +51,15 @@ function matchesSupportedUrl(site: SiteRewriter, url: URL, settings?: DomainSett
 
 function stripQueryParams(url: URL, allowedParams: readonly string[] = []) {
 	const allowed = new Set(allowedParams);
-	const keysToRemove = url.searchParams.keys().filter((key) => !allowed.has(key));
+	const kept = new URLSearchParams();
 
-	for (const key of keysToRemove) {
-		url.searchParams.delete(key);
+	for (const [key, value] of url.searchParams) {
+		if (allowed.has(key)) {
+			kept.append(key, value);
+		}
 	}
+
+	url.search = kept.toString();
 }
 
 export function rewriteSiteUrl(site: SiteRewriter, rawUrl: string, settings: DomainSettings) {
