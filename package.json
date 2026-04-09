@@ -6,16 +6,16 @@
 	"type": "module",
 	"scripts": {
 		"build": "wxt build",
-		"build:firefox": "wxt build -b firefox",
+		"build:firefox": "wxt build -b firefox --mv3",
 		"compile": "tsc --noEmit",
 		"dev": "wxt",
-		"dev:firefox": "wxt -b firefox",
+		"dev:firefox": "wxt -b firefox --mv3",
 		"format": "oxfmt --write",
 		"lint": "oxlint --type-aware --type-check --fix --fix-suggestions",
 		"postinstall": "wxt prepare",
 		"prepare": "husky",
 		"zip": "wxt zip",
-		"zip:firefox": "wxt zip -b firefox"
+		"zip:firefox": "wxt zip -b firefox --mv3"
 	},
 	"dependencies": {
 		"react": "^19.2.4",

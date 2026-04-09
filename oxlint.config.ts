@@ -1,6 +1,7 @@
-{
-	"$schema": "./node_modules/oxlint/configuration_schema.json",
-	"plugins": [
+import { defineConfig } from "oxlint";
+
+export default defineConfig({
+	plugins: [
 		"eslint",
 		"typescript",
 		"unicorn",
@@ -10,35 +11,35 @@
 		"import",
 		"jsx-a11y",
 		"node",
-		"promise"
+		"promise",
 	],
-	"categories": {
-		"correctness": "error",
-		"suspicious": "error",
-		"pedantic": "error",
-		"style": "error",
-		"restriction": "error",
-		"perf": "error"
+	categories: {
+		correctness: "error",
+		suspicious: "error",
+		pedantic: "error",
+		style: "error",
+		restriction: "error",
+		perf: "error",
 	},
-	"rules": {
+	rules: {
 		"eslint/id-length": "off",
-		"import/max-dependencies": ["warn", { "ignoreTypeImports": true }],
+		"import/max-dependencies": ["warn", { ignoreTypeImports: true }],
 		"import/group-exports": "off",
 		"eslint/eqeqeq": ["error", "smart"],
 		"eslint/max-lines": [
 			"warn",
 			{
-				"skipBlankLines": true,
-				"skipComments": true
-			}
+				skipBlankLines: true,
+				skipComments: true,
+			},
 		],
 		"eslint/func-style": "off",
 		"eslint/max-lines-per-function": [
 			"warn",
 			{
-				"skipBlankLines": true,
-				"skipComments": true
-			}
+				skipBlankLines: true,
+				skipComments: true,
+			},
 		],
 		"eslint/max-params": "off",
 		"eslint/max-statements": "off",
@@ -59,8 +60,8 @@
 		"eslint/no-duplicate-imports": [
 			"error",
 			{
-				"allowSeparateTypeImports": true
-			}
+				allowSeparateTypeImports: true,
+			},
 		],
 		"eslint/sort-imports": "off",
 		"import/consistent-type-specifier-style": "off",
@@ -69,7 +70,7 @@
 		"import/no-relative-parent-imports": "off",
 		"import/no-named-export": "off",
 		"import/no-nodejs-modules": "off",
-		"import/no-unassigned-import": ["error", { "allow": ["**/*.css"] }],
+		"import/no-unassigned-import": ["error", { allow: ["**/*.css"] }],
 		"import/prefer-default-export": "off",
 		"import/unambiguous": "off",
 		"import/exports-last": "off",
@@ -80,8 +81,8 @@
 		"react/jsx-filename-extension": [
 			"error",
 			{
-				"extensions": ["jsx", "tsx"]
-			}
+				extensions: ["jsx", "tsx"],
+			},
 		],
 		"react/jsx-max-depth": "off",
 		"react/jsx-props-no-spreading": "off",
@@ -90,7 +91,7 @@
 		"react-perf/jsx-no-new-function-as-prop": "off",
 		"react-perf/jsx-no-new-object-as-prop": "off",
 		"typescript/no-explicit-any": "off",
-		"typescript/consistent-type-imports": ["error", { "disallowTypeAnnotations": false }],
+		"typescript/consistent-type-imports": ["error", { disallowTypeAnnotations: false }],
 		"typescript/array-type": "off",
 		"typescript/consistent-type-definitions": "off",
 		"typescript/explicit-function-return-type": "off",
@@ -111,19 +112,19 @@
 		"unicorn/prefer-global-this": "off",
 		"unicorn/prefer-top-level-await": "off",
 		"unicorn/escape-case": "off",
-		"unicorn/text-encoding-identifier-case": "off"
+		"unicorn/text-encoding-identifier-case": "off",
 	},
-	"overrides": [
+	overrides: [
 		{
-			"files": ["*.config.{js,ts}", "src/entrypoints/*.ts"],
-			"rules": {
+			files: ["*.config.{js,ts}", "src/entrypoints/*.ts"],
+			rules: {
 				"import/no-default-export": "off",
-				"import/prefer-default-export": ["error", { "target": "any" }]
-			}
-		}
+				"import/prefer-default-export": ["error", { target: "any" }],
+			},
+		},
 	],
-	"env": {
-		"builtin": true
+	env: {
+		builtin: true,
 	},
-	"globals": {}
-}
+	globals: {},
+});
