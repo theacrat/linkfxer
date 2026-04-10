@@ -96,6 +96,19 @@ jobs:
           if-no-files-found: error
           include-hidden-files: true
 
+      - name: Create release
+        if: steps.release_check.outputs.should_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: ${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          files: |
+            .output/*-chrome.zip
+            .output/*-firefox.zip
+
       - name: Submit to Chrome Web Store
         if: steps.release_check.outputs.should_release == 'true'
         continue-on-error: true
@@ -137,16 +150,3 @@ jobs:
           else
             echo "::notice::Both submissions succeeded"
           fi
-
-      - name: Create release
-        if: steps.release_check.outputs.should_release == 'true'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.version.outputs.version }}
-          name: ${{ steps.version.outputs.version }}
-          generate_release_notes: true
-          draft: false
-          prerelease: false
-          files: |
-            .output/*-chrome.zip
-            .output/*-firefox.zip
