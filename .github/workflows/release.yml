@@ -71,6 +71,15 @@ jobs:
           bun run zip &&
           bun run zip:firefox
 
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          path: |
+            .output/*-chrome.zip
+            .output/*-firefox.zip
+          if-no-files-found: error
+          include-hidden-files: true
+
       - name: Submit to Chrome Web Store
         if: steps.release_check.outputs.should_release == 'true'
         continue-on-error: true
