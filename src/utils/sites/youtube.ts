@@ -7,7 +7,7 @@ function isShortLink(url: URL) {
 }
 
 export const youtubeRewriter: SiteRewriter = {
-	allowedSearchParams: ["v"],
+	allowedSearchParams: ["v", "t"],
 	defaultDomain: "www.koutube.com",
 	domains: [SHORTLINK_HOST, "youtube.com"],
 	matchUrl: (url) => isShortLink(url) && url.pathname.length > 1,
@@ -15,7 +15,9 @@ export const youtubeRewriter: SiteRewriter = {
 	rewriteUrl: (url, replacementHost) => {
 		if (isShortLink(url)) {
 			const videoId = url.pathname.slice(1).replace(/\/$/, "");
-			return `https://${replacementHost}/watch?v=${videoId}`;
+			url.searchParams.append("v", videoId);
+
+			return `https://${replacementHost}/watch${url.search}`;
 		}
 
 		url.protocol = "https:";

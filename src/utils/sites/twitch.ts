@@ -1,6 +1,7 @@
 import type { SiteRewriter } from "./base";
 
 export const twitchRewriter: SiteRewriter = {
+	allowedSearchParams: ["t"],
 	defaultDomain: "fxtwitch.seria.moe",
 	domains: ["clips.twitch.tv", "twitch.tv"],
 	name: "Twitch",

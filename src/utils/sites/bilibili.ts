@@ -1,7 +1,7 @@
 import type { SiteRewriter } from "./base";
 
 export const bilibiliRewriter: SiteRewriter = {
-	allowedSearchParams: ["p"],
+	allowedSearchParams: ["p", "t"],
 	defaultDomain: "vxbilibili.com",
 	domains: ["b23.tv", "bilibili.com"],
 	name: "BiliBili",
