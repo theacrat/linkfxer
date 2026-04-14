@@ -141,7 +141,7 @@ jobs:
           bun run zip:firefox
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           path: |
             .output/*-chrome.zip
