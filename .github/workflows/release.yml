@@ -3,11 +3,15 @@ name: Build and Release
 on:
   workflow_dispatch:
     inputs:
-      force_release:
-        description: Force a release when manually running this workflow
-        required: false
-        type: boolean
-        default: false
+      release_target:
+        description: Store release target for a manual run
+        required: true
+        type: choice
+        options:
+          - both
+          - chrome
+          - firefox
+        default: both
   pull_request:
   push:
 
@@ -18,6 +22,9 @@ jobs:
       contents: write
     outputs:
       should_release: ${{ steps.release_check.outputs.should_release }}
+      should_create_release: ${{ steps.release_check.outputs.should_create_release }}
+      should_submit_chrome: ${{ steps.release_check.outputs.should_submit_chrome }}
+      should_submit_firefox: ${{ steps.release_check.outputs.should_submit_firefox }}
       version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v6
@@ -29,6 +36,19 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Checkout latest tag for manual releases
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          latest_tag="$(git tag --sort=-version:refname | head -n 1)"
+
+          if [ -z "$latest_tag" ]; then
+            echo "::error::No tags found for manual release"
+            exit 1
+          fi
+
+          git checkout --detach "$latest_tag"
+          echo "Building from tagged commit $latest_tag"
 
       - uses: oven-sh/setup-bun@v2
 
@@ -46,16 +66,40 @@ jobs:
           REF_NAME: ${{ github.ref_name }}
           BEFORE_SHA: ${{ github.event.before }}
           CURRENT_VERSION: ${{ steps.version.outputs.version }}
-          FORCE_RELEASE: ${{ github.event.inputs.force_release || 'false' }}
+          RELEASE_TARGET: ${{ github.event.inputs.release_target || 'both' }}
         run: |
-          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "$FORCE_RELEASE" = "true" ]; then
-            echo "Force release requested from workflow_dispatch"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "Manual release requested for $RELEASE_TARGET"
             echo "should_release=true" >> $GITHUB_OUTPUT
+            echo "should_create_release=false" >> $GITHUB_OUTPUT
+
+            case "$RELEASE_TARGET" in
+              chrome)
+                echo "should_submit_chrome=true" >> $GITHUB_OUTPUT
+                echo "should_submit_firefox=false" >> $GITHUB_OUTPUT
+                ;;
+              firefox)
+                echo "should_submit_chrome=false" >> $GITHUB_OUTPUT
+                echo "should_submit_firefox=true" >> $GITHUB_OUTPUT
+                ;;
+              both)
+                echo "should_submit_chrome=true" >> $GITHUB_OUTPUT
+                echo "should_submit_firefox=true" >> $GITHUB_OUTPUT
+                ;;
+              *)
+                echo "::error::Unknown release target: $RELEASE_TARGET"
+                exit 1
+                ;;
+            esac
+
             exit 0
           fi
 
           if [ "$EVENT_NAME" != "push" ] || [ "$REF_NAME" != "main" ]; then
             echo "should_release=false" >> $GITHUB_OUTPUT
+            echo "should_create_release=false" >> $GITHUB_OUTPUT
+            echo "should_submit_chrome=false" >> $GITHUB_OUTPUT
+            echo "should_submit_firefox=false" >> $GITHUB_OUTPUT
             exit 0
           fi
 
@@ -70,17 +114,26 @@ jobs:
           if [ -n "$previous_version" ] && [ "$previous_version" = "$current_version" ]; then
             echo "Version unchanged at $current_version"
             echo "should_release=false" >> $GITHUB_OUTPUT
+            echo "should_create_release=false" >> $GITHUB_OUTPUT
+            echo "should_submit_chrome=false" >> $GITHUB_OUTPUT
+            echo "should_submit_firefox=false" >> $GITHUB_OUTPUT
             exit 0
           fi
 
           if git rev-parse "$CURRENT_VERSION" >/dev/null 2>&1; then
             echo "Tag $CURRENT_VERSION already exists"
             echo "should_release=false" >> $GITHUB_OUTPUT
+            echo "should_create_release=false" >> $GITHUB_OUTPUT
+            echo "should_submit_chrome=false" >> $GITHUB_OUTPUT
+            echo "should_submit_firefox=false" >> $GITHUB_OUTPUT
             exit 0
           fi
 
           echo "Version bumped from ${previous_version:-<none>} to $current_version"
           echo "should_release=true" >> $GITHUB_OUTPUT
+          echo "should_create_release=true" >> $GITHUB_OUTPUT
+          echo "should_submit_chrome=true" >> $GITHUB_OUTPUT
+          echo "should_submit_firefox=true" >> $GITHUB_OUTPUT
 
       - name: Zip extensions
         run: |
@@ -97,7 +150,7 @@ jobs:
           include-hidden-files: true
 
       - name: Create release
-        if: steps.release_check.outputs.should_release == 'true'
+        if: steps.release_check.outputs.should_create_release == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.version }}
@@ -110,7 +163,7 @@ jobs:
             .output/*-firefox.zip
 
       - name: Submit to Chrome Web Store
-        if: steps.release_check.outputs.should_release == 'true'
+        if: steps.release_check.outputs.should_submit_chrome == 'true'
         continue-on-error: true
         id: chrome_submit
         run: |
@@ -123,7 +176,7 @@ jobs:
           CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
 
       - name: Submit to Firefox Addon Store
-        if: steps.release_check.outputs.should_release == 'true'
+        if: steps.release_check.outputs.should_submit_firefox == 'true'
         continue-on-error: true
         id: firefox_submit
         run: |
@@ -136,17 +189,41 @@ jobs:
           FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
 
       - name: Check submission results
-        if: steps.release_check.outputs.should_release == 'true'
+        if: steps.release_check.outputs.should_submit_chrome == 'true' || steps.release_check.outputs.should_submit_firefox == 'true'
         run: |
           echo "Chrome submission: ${{ steps.chrome_submit.outcome }}"
           echo "Firefox submission: ${{ steps.firefox_submit.outcome }}"
-          if [ "${{ steps.chrome_submit.outcome }}" = "failure" ] && [ "${{ steps.firefox_submit.outcome }}" = "failure" ]; then
+
+          chrome_requested="${{ steps.release_check.outputs.should_submit_chrome }}"
+          firefox_requested="${{ steps.release_check.outputs.should_submit_firefox }}"
+          chrome_failed=false
+          firefox_failed=false
+
+          if [ "$chrome_requested" = "true" ] && [ "${{ steps.chrome_submit.outcome }}" = "failure" ]; then
+            chrome_failed=true
+          fi
+
+          if [ "$firefox_requested" = "true" ] && [ "${{ steps.firefox_submit.outcome }}" = "failure" ]; then
+            firefox_failed=true
+          fi
+
+          if [ "$chrome_failed" = "true" ] && [ "$firefox_failed" = "true" ]; then
             echo "::error::Both store submissions failed"
             exit 1
-          elif [ "${{ steps.chrome_submit.outcome }}" = "failure" ]; then
+          elif [ "$chrome_failed" = "true" ] && [ "$firefox_requested" = "true" ]; then
             echo "::warning::Chrome submission failed, but Firefox succeeded"
-          elif [ "${{ steps.firefox_submit.outcome }}" = "failure" ]; then
+          elif [ "$firefox_failed" = "true" ] && [ "$chrome_requested" = "true" ]; then
             echo "::warning::Firefox submission failed, but Chrome succeeded"
-          else
+          elif [ "$chrome_failed" = "true" ]; then
+            echo "::error::Chrome submission failed"
+            exit 1
+          elif [ "$firefox_failed" = "true" ]; then
+            echo "::error::Firefox submission failed"
+            exit 1
+          elif [ "$chrome_requested" = "true" ] && [ "$firefox_requested" = "true" ]; then
             echo "::notice::Both submissions succeeded"
+          elif [ "$chrome_requested" = "true" ]; then
+            echo "::notice::Chrome submission succeeded"
+          else
+            echo "::notice::Firefox submission succeeded"
           fi
