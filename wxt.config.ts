@@ -16,7 +16,6 @@ export default defineConfig({
 		browser_specific_settings: {
 			gecko: {
 				id: "linkfxer@thea.pet",
-				// @ts-expect-error - WXT doesn't support this field yet
 				data_collection_permissions: {
 					required: ["none"],
 				},
