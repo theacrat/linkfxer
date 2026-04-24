@@ -12,6 +12,7 @@
 		"dev:firefox": "wxt -b firefox --mv3",
 		"format": "oxfmt --write",
 		"lint": "oxlint --type-aware --type-check --fix --fix-suggestions",
+		"lint:style": "stylelint --fix",
 		"postinstall": "wxt prepare",
 		"prepare": "husky",
 		"zip": "wxt zip",
@@ -35,6 +36,9 @@
 		"oxfmt": "^0.46.0",
 		"oxlint": "^1.61.0",
 		"oxlint-tsgolint": "^0.17.4",
+		"stylelint": "^17.9.0",
+		"stylelint-config-clean-order": "^8.0.1",
+		"stylelint-config-standard": "^40.0.0",
 		"tailwindcss": "^4.2.4",
 		"typescript": "^5.9.3",
 		"wxt": "^0.20.25"
@@ -42,6 +46,7 @@
 	"lint-staged": {
 		"*": [
 			"bun run lint --no-error-on-unmatched-pattern",
+			"bun run lint:style",
 			"bun run format"
 		]
 	},

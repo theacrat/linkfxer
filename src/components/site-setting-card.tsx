@@ -66,6 +66,7 @@ function updateSiteSettings(
 		},
 	}));
 }
+
 function createSavedSettings(settings: DomainSettings, site: SiteRewriter) {
 	const siteSettings = getSiteSettings(settings, site.service);
 	const targetDomain = normaliseOptionalDomain(siteSettings.targetDomain);
@@ -84,6 +85,7 @@ function createSavedSettings(settings: DomainSettings, site: SiteRewriter) {
 		},
 	};
 }
+
 function createResetSettings(settings: DomainSettings, site: SiteRewriter) {
 	return {
 		...settings,
@@ -94,6 +96,7 @@ function createResetSettings(settings: DomainSettings, site: SiteRewriter) {
 		},
 	};
 }
+
 async function persistSettings(
 	nextSettings: DomainSettings,
 	setSettings: Dispatch<SetStateAction<DomainSettings>>,
@@ -101,6 +104,7 @@ async function persistSettings(
 	await setDomainSettings(nextSettings);
 	setSettings(nextSettings);
 }
+
 async function persistAndNotify(
 	nextSettings: DomainSettings,
 	onPersisted: ((nextSettings: DomainSettings) => void) | undefined,
@@ -109,6 +113,7 @@ async function persistAndNotify(
 	await persistSettings(nextSettings, actions.setSettings);
 	onPersisted?.(nextSettings);
 }
+
 function getInvalidSettingsMessage(
 	settings: DomainSettings,
 	site: SiteRewriter,
