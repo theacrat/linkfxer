@@ -1,10 +1,17 @@
 import { rewriteCopiedText } from "@/utils/rewrite";
-import { getDomainSettings, STORAGE_KEY, type DomainSettings } from "@/utils/settings";
+import {
+	getDomainSettings,
+	STORAGE_KEY,
+	type DomainSettings,
+} from "@/utils/settings";
 
 const SETTINGS_MESSAGE_TYPE = "linkfxer:settings-update";
 
 function postSettingsToMainWorld(domainSettings: DomainSettings) {
-	window.postMessage({ type: SETTINGS_MESSAGE_TYPE, domainSettings }, window.location.origin);
+	window.postMessage(
+		{ type: SETTINGS_MESSAGE_TYPE, domainSettings },
+		window.location.origin,
+	);
 }
 
 export default defineContentScript({

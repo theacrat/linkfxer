@@ -18,7 +18,8 @@ export const DEFAULT_SITE_SETTINGS = createDomainSettings((site) => ({
 
 export const STORAGE_KEY = "domainSettings";
 
-const HOSTNAME_PATTERN = /^(?=.{1,253}$)(?!-)[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,63}$/i;
+const HOSTNAME_PATTERN =
+	/^(?=.{1,253}$)(?!-)[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,63}$/i;
 
 function extractHostname(input: string) {
 	const trimmed = input.trim().toLowerCase();
@@ -28,7 +29,8 @@ function extractHostname(input: string) {
 	}
 
 	const withoutProtocol = trimmed.replace(/^[a-z]+:\/\//i, "");
-	const hostname = withoutProtocol.split("/")[0]?.split("?")[0]?.split("#")[0] ?? "";
+	const hostname =
+		withoutProtocol.split("/")[0]?.split("?")[0]?.split("#")[0] ?? "";
 
 	return hostname.replace(/:\d+$/, "");
 }
@@ -82,7 +84,10 @@ export function normaliseDomainList(input: string) {
 	return normalisedDomains;
 }
 
-export function getCustomDomains(settings: DomainSettings, service: ServiceKey) {
+export function getCustomDomains(
+	settings: DomainSettings,
+	service: ServiceKey,
+) {
 	return normaliseDomainList(settings[service].customDomains) ?? [];
 }
 
@@ -91,9 +96,12 @@ export function sanitiseSettings(value: unknown): DomainSettings {
 
 	return createDomainSettings((site) => {
 		const entry = storedSettings?.[site.service];
-		const targetDomainInput = typeof entry === "string" ? entry : entry?.targetDomain;
-		const customDomainsInput = typeof entry === "string" ? "" : entry?.customDomains;
-		const interceptCopyInput = typeof entry === "string" ? undefined : entry?.interceptCopy;
+		const targetDomainInput =
+			typeof entry === "string" ? entry : entry?.targetDomain;
+		const customDomainsInput =
+			typeof entry === "string" ? "" : entry?.customDomains;
+		const interceptCopyInput =
+			typeof entry === "string" ? undefined : entry?.interceptCopy;
 		let { customDomains } = DEFAULT_SITE_SETTINGS[site.service];
 
 		if (customDomainsInput !== undefined) {
@@ -153,7 +161,8 @@ function asStoredDomainSettings(
 		return undefined;
 	}
 
-	const settings: Partial<Record<ServiceKey, string | Partial<SiteSettings>>> = {};
+	const settings: Partial<Record<ServiceKey, string | Partial<SiteSettings>>> =
+		{};
 
 	for (const site of SITE_REWRITERS) {
 		const candidate = value[site.service];
@@ -163,11 +172,17 @@ function asStoredDomainSettings(
 		} else if (isStringRecord(candidate)) {
 			settings[site.service] = {
 				customDomains:
-					typeof candidate.customDomains === "string" ? candidate.customDomains : undefined,
+					typeof candidate.customDomains === "string"
+						? candidate.customDomains
+						: undefined,
 				interceptCopy:
-					typeof candidate.interceptCopy === "boolean" ? candidate.interceptCopy : undefined,
+					typeof candidate.interceptCopy === "boolean"
+						? candidate.interceptCopy
+						: undefined,
 				targetDomain:
-					typeof candidate.targetDomain === "string" ? candidate.targetDomain : undefined,
+					typeof candidate.targetDomain === "string"
+						? candidate.targetDomain
+						: undefined,
 			};
 		}
 	}

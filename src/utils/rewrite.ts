@@ -18,7 +18,9 @@ export function findSiteRewriter(
 	settings?: DomainSettings,
 ): SiteRewriter | undefined {
 	return SITE_REWRITERS.find((site) =>
-		settings ? matchesSiteWithSettings(site, hostname, settings) : matchesSite(site, hostname),
+		settings
+			? matchesSiteWithSettings(site, hostname, settings)
+			: matchesSite(site, hostname),
 	);
 }
 
@@ -27,7 +29,9 @@ export function findSiteRewriterForUrl(
 	settings?: DomainSettings,
 ): SiteRewriter | undefined {
 	return SITE_REWRITERS.find((site) =>
-		settings ? supportsSiteUrlWithSettings(site, rawUrl, settings) : supportsSiteUrl(site, rawUrl),
+		settings
+			? supportsSiteUrlWithSettings(site, rawUrl, settings)
+			: supportsSiteUrl(site, rawUrl),
 	);
 }
 
@@ -44,7 +48,9 @@ export function rewriteUrl(rawUrl: string, settings: DomainSettings) {
 }
 
 export function rewriteText(text: string, settings: DomainSettings) {
-	return text.replaceAll(/https?:\/\/[^\s<>"']+/gi, (match) => rewriteUrl(match, settings));
+	return text.replaceAll(/https?:\/\/[^\s<>"']+/gi, (match) =>
+		rewriteUrl(match, settings),
+	);
 }
 
 function rewriteUrlForCopy(rawUrl: string, settings: DomainSettings) {
@@ -64,5 +70,7 @@ function rewriteUrlForCopy(rawUrl: string, settings: DomainSettings) {
 }
 
 export function rewriteCopiedText(text: string, settings: DomainSettings) {
-	return text.replaceAll(/https?:\/\/[^\s<>"']+/gi, (match) => rewriteUrlForCopy(match, settings));
+	return text.replaceAll(/https?:\/\/[^\s<>"']+/gi, (match) =>
+		rewriteUrlForCopy(match, settings),
+	);
 }

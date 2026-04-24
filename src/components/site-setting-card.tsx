@@ -1,6 +1,12 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 
 import {
+	CustomDomainsField,
+	DomainField,
+	FormActions,
+	InterceptCopyField,
+} from "@/components/site-setting-card-fields";
+import {
 	normaliseDomainList,
 	normaliseOptionalDomain,
 	setDomainSettings,
@@ -25,24 +31,12 @@ type SiteSettingFormProps = {
 	interceptCopy: boolean;
 	onCustomDomainsChange: (value: string) => void;
 	onInterceptCopyChange: (value: boolean) => void;
-	onReset: () => void;
-	onSave: () => void;
+	onReset: () => Promise<void>;
+	onSave: () => Promise<void>;
 	onTargetDomainChange: (value: string) => void;
 	site: SiteRewriter;
 	status: string;
 	targetDomain: string;
-};
-
-type DomainFieldProps = {
-	context: SiteSettingCardContext;
-	onTargetDomainChange: (value: string) => void;
-	site: SiteRewriter;
-	targetDomain: string;
-};
-
-type CustomDomainsFieldProps = {
-	customDomains: string;
-	onCustomDomainsChange: (value: string) => void;
 };
 
 type SiteSettingHandlers = {
@@ -51,6 +45,11 @@ type SiteSettingHandlers = {
 	updateCustomDomains: (value: string) => void;
 	updateInterceptCopy: (value: boolean) => void;
 	updateTargetDomain: (value: string) => void;
+};
+
+type SiteStatusActions = {
+	setStatus: Dispatch<SetStateAction<string>>;
+	setSettings: Dispatch<SetStateAction<DomainSettings>>;
 };
 
 function updateSiteSettings(
@@ -66,10 +65,13 @@ function updateSiteSettings(
 		},
 	}));
 }
-
 function createSavedSettings(settings: DomainSettings, site: SiteRewriter) {
-	const targetDomain = normaliseOptionalDomain(settings[site.service].targetDomain);
-	const customDomains = normaliseDomainList(settings[site.service].customDomains);
+	const targetDomain = normaliseOptionalDomain(
+		settings[site.service].targetDomain,
+	);
+	const customDomains = normaliseDomainList(
+		settings[site.service].customDomains,
+	);
 
 	if (targetDomain === null || customDomains === null) {
 		return null;
@@ -84,7 +86,6 @@ function createSavedSettings(settings: DomainSettings, site: SiteRewriter) {
 		},
 	};
 }
-
 function createResetSettings(settings: DomainSettings, site: SiteRewriter) {
 	return {
 		...settings,
@@ -95,7 +96,6 @@ function createResetSettings(settings: DomainSettings, site: SiteRewriter) {
 		},
 	};
 }
-
 async function persistSettings(
 	nextSettings: DomainSettings,
 	setSettings: Dispatch<SetStateAction<DomainSettings>>,
@@ -103,117 +103,67 @@ async function persistSettings(
 	await setDomainSettings(nextSettings);
 	setSettings(nextSettings);
 }
-
-function getInvalidSettingsMessage(settings: DomainSettings, site: SiteRewriter) {
+async function persistAndNotify(
+	nextSettings: DomainSettings,
+	onPersisted: ((nextSettings: DomainSettings) => void) | undefined,
+	actions: SiteStatusActions,
+) {
+	await persistSettings(nextSettings, actions.setSettings);
+	onPersisted?.(nextSettings);
+}
+function getInvalidSettingsMessage(
+	settings: DomainSettings,
+	site: SiteRewriter,
+) {
 	return normaliseOptionalDomain(settings[site.service].targetDomain) === null
 		? `Enter a valid hostname like ${site.defaultDomain}.`
 		: "Enter valid custom hostnames, one per line.";
 }
 
-function DomainField({ onTargetDomainChange, context, site, targetDomain }: DomainFieldProps) {
-	return (
-		<label className="grid gap-1.5">
-			<span className="text-sm font-bold">Fxed domain</span>
-			<input
-				type="text"
-				value={targetDomain}
-				onChange={(event) => {
-					onTargetDomainChange(event.target.value);
-				}}
-				placeholder={site.defaultDomain}
-				spellCheck={false}
-				className="box-border w-full px-2 py-1.5"
-			/>
-			{context === "popup" && (
-				<small className="text-xs">Leave blank to disable rewriting for this site.</small>
-			)}
-		</label>
-	);
-}
-
-function CustomDomainsField({ customDomains, onCustomDomainsChange }: CustomDomainsFieldProps) {
-	return (
-		<label className="grid gap-1.5">
-			<span className="text-sm font-bold">Custom source domains</span>
-			<textarea
-				rows={3}
-				value={customDomains}
-				onChange={(event) => {
-					onCustomDomainsChange(event.target.value);
-				}}
-				placeholder="One hostname per line"
-				spellCheck={false}
-				className="box-border w-full resize-y px-2 py-1.5"
-			/>
-		</label>
-	);
-}
-
 function createSiteSettingHandlers(
 	onPersisted: ((nextSettings: DomainSettings) => void) | undefined,
-	setSettings: Dispatch<SetStateAction<DomainSettings>>,
-	setStatus: Dispatch<SetStateAction<string>>,
+	actions: SiteStatusActions,
 	settings: DomainSettings,
 	site: SiteRewriter,
 ): SiteSettingHandlers {
 	return {
 		resetSite: async () => {
 			const nextSettings = createResetSettings(settings, site);
-			await persistSettings(nextSettings, setSettings);
-			onPersisted?.(nextSettings);
-			setStatus("");
+			await persistAndNotify(nextSettings, onPersisted, actions);
+			actions.setStatus("");
 		},
 		saveSite: async () => {
 			const nextSettings = createSavedSettings(settings, site);
 
 			if (!nextSettings) {
-				setStatus(getInvalidSettingsMessage(settings, site));
+				actions.setStatus(getInvalidSettingsMessage(settings, site));
 				return;
 			}
 
-			await persistSettings(nextSettings, setSettings);
-			onPersisted?.(nextSettings);
-			setStatus("");
+			await persistAndNotify(nextSettings, onPersisted, actions);
+			actions.setStatus("");
 		},
 		updateCustomDomains: (value: string) => {
-			updateSiteSettings(setSettings, site.service, { customDomains: value });
-			setStatus("");
+			updateSiteSettings(actions.setSettings, site.service, {
+				customDomains: value,
+			});
+			actions.setStatus("");
 		},
 		updateInterceptCopy: (value: boolean) => {
 			const nextSettings = {
 				...settings,
 				[site.service]: { ...settings[site.service], interceptCopy: value },
 			};
-			void persistSettings(nextSettings, setSettings);
+			void persistSettings(nextSettings, actions.setSettings);
 			onPersisted?.(nextSettings);
 		},
 		updateTargetDomain: (value: string) => {
-			updateSiteSettings(setSettings, site.service, { targetDomain: value });
-			setStatus("");
+			updateSiteSettings(actions.setSettings, site.service, {
+				targetDomain: value,
+			});
+			actions.setStatus("");
 		},
 	};
-}
-
-function InterceptCopyField({
-	interceptCopy,
-	onInterceptCopyChange,
-}: {
-	interceptCopy: boolean;
-	onInterceptCopyChange: (value: boolean) => void;
-}) {
-	return (
-		<label className="flex cursor-pointer items-center gap-2 text-sm">
-			<input
-				type="checkbox"
-				checked={interceptCopy}
-				onChange={(event) => {
-					onInterceptCopyChange(event.target.checked);
-				}}
-				className="m-0 cursor-pointer"
-			/>
-			<span>Rewrite copied links</span>
-		</label>
-	);
 }
 
 function SiteSettingForm({
@@ -248,24 +198,7 @@ function SiteSettingForm({
 				interceptCopy={interceptCopy}
 				onInterceptCopyChange={onInterceptCopyChange}
 			/>
-
-			<div className="flex gap-2">
-				<button
-					type="button"
-					className={context === "popup" ? "flex-1" : "min-w-18"}
-					onClick={onSave}
-				>
-					Save
-				</button>
-				<button
-					type="button"
-					className={context === "popup" ? "flex-1" : "min-w-18"}
-					onClick={onReset}
-				>
-					Reset
-				</button>
-			</div>
-
+			<FormActions context={context} onReset={onReset} onSave={onSave} />
 			{status ? <span className="text-sm text-red-500">{status}</span> : null}
 		</section>
 	);
@@ -284,8 +217,18 @@ export function SiteSettingCard({
 	useEffect(() => {
 		setStatus(initialStatus);
 	}, [initialStatus]);
-	const { resetSite, saveSite, updateCustomDomains, updateInterceptCopy, updateTargetDomain } =
-		createSiteSettingHandlers(onPersisted, setSettings, setStatus, settings, site);
+	const {
+		resetSite,
+		saveSite,
+		updateCustomDomains,
+		updateInterceptCopy,
+		updateTargetDomain,
+	} = createSiteSettingHandlers(
+		onPersisted,
+		{ setSettings, setStatus },
+		settings,
+		site,
+	);
 
 	return (
 		<SiteSettingForm

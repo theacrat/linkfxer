@@ -91,7 +91,10 @@ export default defineConfig({
 		"react-perf/jsx-no-new-function-as-prop": "off",
 		"react-perf/jsx-no-new-object-as-prop": "off",
 		"typescript/no-explicit-any": "off",
-		"typescript/consistent-type-imports": ["error", { disallowTypeAnnotations: false }],
+		"typescript/consistent-type-imports": [
+			"error",
+			{ disallowTypeAnnotations: false },
+		],
 		"typescript/array-type": "off",
 		"typescript/consistent-type-definitions": "off",
 		"typescript/explicit-function-return-type": "off",

@@ -32,7 +32,9 @@ export default defineContentScript({
 			({ domainSettings } = event.data);
 		});
 
-		const originalWriteText = navigator.clipboard.writeText.bind(navigator.clipboard);
+		const originalWriteText = navigator.clipboard.writeText.bind(
+			navigator.clipboard,
+		);
 
 		navigator.clipboard.writeText = async (text: string) => {
 			if (domainSettings) {

@@ -1,10 +1,10 @@
 import { defineConfig } from "oxfmt";
 
 export default defineConfig({
-	sortImports: {},
+	sortImports: true,
 	sortPackageJson: {
 		sortScripts: true,
 	},
-	sortTailwindcss: {},
+	sortTailwindcss: true,
 	ignorePatterns: [],
 });

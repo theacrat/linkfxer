@@ -15,15 +15,21 @@ export type SiteRewriter = {
 };
 
 export function matchesSite(site: SiteRewriter, hostname: string) {
-	return site.domains.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));
+	return site.domains.some(
+		(domain) => hostname === domain || hostname.endsWith(`.${domain}`),
+	);
 }
 
 function matchesHostname(hostname: string, domains: readonly string[]) {
-	return domains.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));
+	return domains.some(
+		(domain) => hostname === domain || hostname.endsWith(`.${domain}`),
+	);
 }
 
 export function matchesSupportedPath(site: SiteRewriter, pathname: string) {
-	return site.supportedPaths.some((pattern) => new RegExp(pattern, "i").test(pathname));
+	return site.supportedPaths.some((pattern) =>
+		new RegExp(pattern, "i").test(pathname),
+	);
 }
 
 function getSourceDomains(site: SiteRewriter, settings?: DomainSettings) {
@@ -34,7 +40,11 @@ function getSourceDomains(site: SiteRewriter, settings?: DomainSettings) {
 	return [...site.domains, ...getCustomDomains(settings, site.service)];
 }
 
-function matchesSupportedUrl(site: SiteRewriter, url: URL, settings?: DomainSettings) {
+function matchesSupportedUrl(
+	site: SiteRewriter,
+	url: URL,
+	settings?: DomainSettings,
+) {
 	if (site.matchUrl) {
 		return (
 			site.matchUrl(url) ||
@@ -62,7 +72,11 @@ function stripQueryParams(url: URL, allowedParams: readonly string[] = []) {
 	url.search = kept.toString();
 }
 
-export function rewriteSiteUrl(site: SiteRewriter, rawUrl: string, settings: DomainSettings) {
+export function rewriteSiteUrl(
+	site: SiteRewriter,
+	rawUrl: string,
+	settings: DomainSettings,
+) {
 	try {
 		const url = new URL(rawUrl);
 
