@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 
 bun compile
-bun lint-staged
+bun run lint-staged

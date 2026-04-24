@@ -1,5 +1,9 @@
 # LinkFxer
 
+[![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/npncanggblbfagfdlffipggblfildlji?style=flat-square&logo=googlechrome&logoColor=white&color=%234285F4)](https://chromewebstore.google.com/detail/linkfxer/npncanggblbfagfdlffipggblfildlji)
+[![Mozilla Add-on Version](https://img.shields.io/amo/v/linkfxer?style=flat-square&logo=firefoxbrowser&logoColor=white&color=%23FF7139)
+](https://addons.mozilla.org/addon/linkfxer/)
+
 LinkFxer is a browser extension that rewrites copied sharing URLs from:
 
 - BiliBili -> BiliFix
@@ -20,6 +24,53 @@ LinkFxer is a browser extension that rewrites copied sharing URLs from:
 - YouTube -> Koutube
 
 You can set the target domain for each service and optionally add custom source domains for alternate frontends or extra instance hosts.
+
+## Local Setup
+
+The [wxt](https://wxt.dev/) browser extension framework is used to handle building and browser functions.
+
+### Installation
+
+```sh
+# Install dependencies
+bun install --frozen-lockfile
+```
+
+### Development
+
+This will create a dev server with HMR and fast reload.
+
+```sh
+# Chromium
+bun run dev
+
+# Firefox
+bun run dev:firefox
+```
+
+### Building
+
+This will build the extension to a folder in `.output`.
+
+```sh
+# Chromium
+bun run build
+
+# Firefox
+bun run build:firefox
+```
+
+### Packaging
+
+This will build and ZIP the extension to `.output`.
+
+```sh
+# Chromium
+bun run zip
+
+# Firefox
+bun run zip:firefox
+```
 
 ## Licence
 

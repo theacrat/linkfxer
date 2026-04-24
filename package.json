@@ -41,8 +41,8 @@
 	},
 	"lint-staged": {
 		"*": [
-			"bun lint",
-			"bun format"
+			"bun run lint --no-error-on-unmatched-pattern",
+			"bun run format"
 		]
 	},
 	"trustedDependencies": [
