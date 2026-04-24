@@ -7,6 +7,7 @@ import {
 	InterceptCopyField,
 } from "@/components/site-setting-card-fields";
 import {
+	getSiteSettings,
 	normaliseDomainList,
 	normaliseOptionalDomain,
 	setDomainSettings,
@@ -55,23 +56,20 @@ type SiteStatusActions = {
 function updateSiteSettings(
 	setSettings: Dispatch<SetStateAction<DomainSettings>>,
 	service: SiteRewriter["service"],
-	value: Partial<DomainSettings[SiteRewriter["service"]]>,
+	value: Partial<ReturnType<typeof getSiteSettings>>,
 ) {
 	setSettings((current) => ({
 		...current,
 		[service]: {
-			...current[service],
+			...getSiteSettings(current, service),
 			...value,
 		},
 	}));
 }
 function createSavedSettings(settings: DomainSettings, site: SiteRewriter) {
-	const targetDomain = normaliseOptionalDomain(
-		settings[site.service].targetDomain,
-	);
-	const customDomains = normaliseDomainList(
-		settings[site.service].customDomains,
-	);
+	const siteSettings = getSiteSettings(settings, site.service);
+	const targetDomain = normaliseOptionalDomain(siteSettings.targetDomain);
+	const customDomains = normaliseDomainList(siteSettings.customDomains);
 
 	if (targetDomain === null || customDomains === null) {
 		return null;
@@ -81,7 +79,7 @@ function createSavedSettings(settings: DomainSettings, site: SiteRewriter) {
 		...settings,
 		[site.service]: {
 			customDomains: customDomains.join("\n"),
-			interceptCopy: settings[site.service].interceptCopy,
+			interceptCopy: siteSettings.interceptCopy,
 			targetDomain,
 		},
 	};
@@ -115,7 +113,9 @@ function getInvalidSettingsMessage(
 	settings: DomainSettings,
 	site: SiteRewriter,
 ) {
-	return normaliseOptionalDomain(settings[site.service].targetDomain) === null
+	return normaliseOptionalDomain(
+		getSiteSettings(settings, site.service).targetDomain,
+	) === null
 		? `Enter a valid hostname like ${site.defaultDomain}.`
 		: "Enter valid custom hostnames, one per line.";
 }
@@ -152,7 +152,10 @@ function createSiteSettingHandlers(
 		updateInterceptCopy: (value: boolean) => {
 			const nextSettings = {
 				...settings,
-				[site.service]: { ...settings[site.service], interceptCopy: value },
+				[site.service]: {
+					...getSiteSettings(settings, site.service),
+					interceptCopy: value,
+				},
 			};
 			void persistSettings(nextSettings, actions.setSettings);
 			onPersisted?.(nextSettings);
@@ -233,8 +236,8 @@ export function SiteSettingCard({
 	return (
 		<SiteSettingForm
 			context={context}
-			customDomains={settings[site.service].customDomains}
-			interceptCopy={settings[site.service].interceptCopy}
+			customDomains={getSiteSettings(settings, site.service).customDomains}
+			interceptCopy={getSiteSettings(settings, site.service).interceptCopy}
 			onCustomDomainsChange={updateCustomDomains}
 			onInterceptCopyChange={updateInterceptCopy}
 			onReset={resetSite}
@@ -242,7 +245,7 @@ export function SiteSettingCard({
 			onTargetDomainChange={updateTargetDomain}
 			site={site}
 			status={status}
-			targetDomain={settings[site.service].targetDomain}
+			targetDomain={getSiteSettings(settings, site.service).targetDomain}
 		/>
 	);
 }

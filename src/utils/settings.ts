@@ -39,6 +39,13 @@ function serialiseDomains(domains: readonly string[]) {
 	return domains.join("\n");
 }
 
+export function getSiteSettings(
+	settings: DomainSettings,
+	service: ServiceKey,
+): SiteSettings {
+	return settings[service]!;
+}
+
 function splitDomains(input: string) {
 	return input
 		.split(/[\n,\s]+/)
@@ -88,7 +95,9 @@ export function getCustomDomains(
 	settings: DomainSettings,
 	service: ServiceKey,
 ) {
-	return normaliseDomainList(settings[service].customDomains) ?? [];
+	return (
+		normaliseDomainList(getSiteSettings(settings, service).customDomains) ?? []
+	);
 }
 
 export function sanitiseSettings(value: unknown): DomainSettings {
@@ -102,7 +111,10 @@ export function sanitiseSettings(value: unknown): DomainSettings {
 			typeof entry === "string" ? "" : entry?.customDomains;
 		const interceptCopyInput =
 			typeof entry === "string" ? undefined : entry?.interceptCopy;
-		let { customDomains } = DEFAULT_SITE_SETTINGS[site.service];
+		let { customDomains } = getSiteSettings(
+			DEFAULT_SITE_SETTINGS,
+			site.service,
+		);
 
 		if (customDomainsInput !== undefined) {
 			const normalisedCustomDomains = normaliseDomainList(customDomainsInput);
@@ -114,14 +126,14 @@ export function sanitiseSettings(value: unknown): DomainSettings {
 
 		const targetDomain =
 			targetDomainInput === undefined
-				? DEFAULT_SITE_SETTINGS[site.service].targetDomain
+				? getSiteSettings(DEFAULT_SITE_SETTINGS, site.service).targetDomain
 				: (normaliseOptionalDomain(targetDomainInput) ??
-					DEFAULT_SITE_SETTINGS[site.service].targetDomain);
+					getSiteSettings(DEFAULT_SITE_SETTINGS, site.service).targetDomain);
 
 		const interceptCopy =
 			typeof interceptCopyInput === "boolean"
 				? interceptCopyInput
-				: DEFAULT_SITE_SETTINGS[site.service].interceptCopy;
+				: getSiteSettings(DEFAULT_SITE_SETTINGS, site.service).interceptCopy;
 
 		return {
 			customDomains,
@@ -145,10 +157,14 @@ export async function setDomainSettings(settings: DomainSettings) {
 function createDomainSettings(
 	getValue: (site: (typeof SITE_REWRITERS)[number]) => SiteSettings,
 ): DomainSettings {
-	const settings = {} as DomainSettings;
+	const settings: Partial<DomainSettings> = {};
 
 	for (const site of SITE_REWRITERS) {
 		settings[site.service] = getValue(site);
+	}
+
+	if (!isDomainSettings(settings)) {
+		throw new TypeError("Failed to create domain settings.");
 	}
 
 	return settings;
@@ -170,20 +186,21 @@ function asStoredDomainSettings(
 		if (typeof candidate === "string") {
 			settings[site.service] = candidate;
 		} else if (isStringRecord(candidate)) {
-			settings[site.service] = {
-				customDomains:
-					typeof candidate.customDomains === "string"
-						? candidate.customDomains
-						: undefined,
-				interceptCopy:
-					typeof candidate.interceptCopy === "boolean"
-						? candidate.interceptCopy
-						: undefined,
-				targetDomain:
-					typeof candidate.targetDomain === "string"
-						? candidate.targetDomain
-						: undefined,
-			};
+			const siteSettings: Partial<SiteSettings> = {};
+
+			if (typeof candidate["customDomains"] === "string") {
+				siteSettings.customDomains = candidate["customDomains"];
+			}
+
+			if (typeof candidate["interceptCopy"] === "boolean") {
+				siteSettings.interceptCopy = candidate["interceptCopy"];
+			}
+
+			if (typeof candidate["targetDomain"] === "string") {
+				siteSettings.targetDomain = candidate["targetDomain"];
+			}
+
+			settings[site.service] = siteSettings;
 		}
 	}
 
@@ -192,4 +209,10 @@ function asStoredDomainSettings(
 
 function isStringRecord(value: unknown): value is Record<string, unknown> {
 	return Boolean(value) && typeof value === "object";
+}
+
+function isDomainSettings(
+	value: Partial<DomainSettings>,
+): value is DomainSettings {
+	return SITE_REWRITERS.every((site) => value[site.service] !== undefined);
 }

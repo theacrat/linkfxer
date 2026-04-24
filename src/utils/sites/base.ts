@@ -1,4 +1,8 @@
-import { getCustomDomains, type DomainSettings } from "@/utils/settings";
+import {
+	getCustomDomains,
+	getSiteSettings,
+	type DomainSettings,
+} from "@/utils/settings";
 
 type MatchUrl = (url: URL) => boolean;
 type RewriteUrl = (url: URL, replacementHost: string) => string;
@@ -86,7 +90,10 @@ export function rewriteSiteUrl(
 
 		stripQueryParams(url, site.allowedSearchParams);
 
-		const replacementHost = settings[site.service].targetDomain;
+		const replacementHost = getSiteSettings(
+			settings,
+			site.service,
+		).targetDomain;
 
 		if (replacementHost) {
 			if (site.rewriteUrl) {

@@ -24,7 +24,7 @@ const COPY_BUTTON_TEXT = "Copy Fxed link";
 const COPY_STATUS_DURATION_MS = 3000;
 
 type PopupState = {
-	currentSite?: SiteRewriter;
+	currentSite: SiteRewriter | undefined;
 	currentUrl: string | null;
 	initialStatus: string;
 	isLoaded: boolean;

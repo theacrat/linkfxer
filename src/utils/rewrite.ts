@@ -1,4 +1,4 @@
-import type { DomainSettings } from "./settings";
+import { getSiteSettings, type DomainSettings } from "./settings";
 import {
 	matchesSite,
 	matchesSiteWithSettings,
@@ -55,7 +55,7 @@ export function rewriteText(text: string, settings: DomainSettings) {
 
 function rewriteUrlForCopy(rawUrl: string, settings: DomainSettings) {
 	for (const site of SITE_REWRITERS) {
-		if (!settings[site.service].interceptCopy) {
+		if (!getSiteSettings(settings, site.service).interceptCopy) {
 			continue;
 		}
 
